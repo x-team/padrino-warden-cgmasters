@@ -78,6 +78,7 @@ module Padrino
       app.set :auth_error_message,   "Could not log you in."
       app.set :auth_success_message, "You have logged in successfully."
       app.set :auth_login_template, 'sessions/login'
+      app.set :auth_layout, nil
       # OAuth Specific Settings
       app.set :auth_use_oauth, false
       
@@ -91,7 +92,7 @@ module Padrino
           status 401
           warden.custom_failure! if warden.config.failure_app == self.class
           env['x-rack.flash'][:error] = options.auth_error_message if defined?(Rack::Flash)
-          render options.auth_login_template
+          render options.auth_login_template, :layout => options.auth_layout
         end
 
         get :login do
@@ -100,7 +101,7 @@ module Padrino
             session[:request_token_secret] = @auth_oauth_request_token.secret
             redirect @auth_oauth_request_token.authorize_url
           else
-            render options.auth_login_template
+            render options.auth_login_template, :layout => options.auth_layout
           end
         end
 
