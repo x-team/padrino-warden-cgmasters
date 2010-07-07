@@ -69,6 +69,8 @@ module Padrino
 
       # Enable Sessions
       app.set :sessions, true
+      app.set :auth_login_path, '/login'
+      app.set :auth_logout_path, '/logout'
       app.set :auth_failure_path, '/'
       app.set :auth_success_path, '/'
       # Setting this to true will store last request URL
@@ -81,12 +83,12 @@ module Padrino
       app.set :auth_layout, nil
       # OAuth Specific Settings
       app.set :auth_use_oauth, false
-      
+
       app.use ::Warden::Manager do |manager|
           manager.default_strategies :password
           manager.failure_app = app
       end
-      
+
       app.controller :sessions do
         post :unauthenticated do
           status 401
@@ -95,7 +97,7 @@ module Padrino
           render options.auth_login_template, :layout => options.auth_layout
         end
 
-        get :login do
+        get :login, :map => app.auth_login_path do
           if options.auth_use_oauth && !@auth_oauth_request_token.nil?
             session[:request_token] = @auth_oauth_request_token.token
             session[:request_token_secret] = @auth_oauth_request_token.secret
@@ -115,14 +117,14 @@ module Padrino
           end
         end
 
-        post :login do
+        post :login, :map => app.auth_login_path do
           authenticate
           env['x-rack.flash'][:success] = options.auth_success_message if defined?(Rack::Flash)
-          redirect options.auth_use_referrer && session[:return_to] ? session.delete(:return_to) : 
+          redirect options.auth_use_referrer && session[:return_to] ? session.delete(:return_to) :
                    options.auth_success_path
         end
 
-        get :logout do
+        get :logout, :map => app.auth_logout_path do
           authorize!
           logout
           env['x-rack.flash'][:success] = options.auth_success_message if defined?(Rack::Flash)
