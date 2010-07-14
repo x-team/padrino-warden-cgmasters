@@ -103,6 +103,7 @@ module Padrino
             session[:request_token_secret] = @auth_oauth_request_token.secret
             redirect @auth_oauth_request_token.authorize_url
           else
+            redirect url(:sessions, :logout) if logged_in?
             render options.auth_login_template, :layout => options.auth_layout
           end
         end
