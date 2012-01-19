@@ -94,7 +94,11 @@ module Padrino
           status 401
           warden.custom_failure! if warden.config.failure_app == self.class
           flash[:error] = options.auth_error_message if flash
-          render options.auth_login_template, :layout => options.auth_layout
+          begin
+            render options.auth_login_template, :layout => options.auth_layout
+          rescue
+            render :haml, options.auth_login_template.to_sym, :layout => options.auth_layout
+          end
         end
 
         get :login, :map => app.auth_login_path do
@@ -104,7 +108,11 @@ module Padrino
             redirect @auth_oauth_request_token.authorize_url
           else
             redirect url(:sessions, :logout) if logged_in?
-            render options.auth_login_template, :layout => options.auth_layout
+            begin
+              render options.auth_login_template, :layout => options.auth_layout
+            rescue
+              render :haml, options.auth_login_template.to_sym, :layout => options.auth_layout
+            end
           end
         end
 
